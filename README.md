@@ -45,7 +45,7 @@ Start a conversation normally. The plugin asks Claude to include a short suggest
 
 Suggestions come from the model and may be imperfect. Read a suggestion before selecting it, especially when it requests an action. Fully visible suggestions send immediately; shortened suggestions replace any existing prompt draft and wait for Enter.
 
-## What the hook does
+## What the hook does and changes
 
 The plugin has one hook module, `hooks/register.tsx`. It does three things:
 
@@ -53,9 +53,11 @@ The plugin has one hook module, `hooks/register.tsx`. It does three things:
 - Hides that tag in the displayed answer.
 - Keeps the current suggestion list in the session's plugin state and draws it as buttons above the prompt box. The list is cleared whenever you send a prompt.
 
-What it changes: the system prompt (one extra section), the displayed answer text (the tag is removed), and the area above the prompt box (the buttons). Nothing else: no files, no settings, no network.
+What the hook changes: the system prompt (one extra section), the displayed answer text (the tag is removed), and the area above the prompt box (the buttons). Nothing else: no files, no settings, no network.
 
-What the buttons send: clicking a fully visible button, or typing its number, submits one prompt as your message. That prompt is exactly the clicked suggestion's text, word for word: either a suggestion Claude wrote in its answer or Claude Code's own built-in prompt suggestion when one is shown. The plugin adds nothing to it. A shortened suggestion is only placed in the prompt box; you read it and send it yourself.
+### What the mod puts in the prompts it submits
+
+Clicking a fully visible button, or typing its number, submits one prompt as your message. The prompt text is exactly the clicked suggestion's text, word for word: either a suggestion Claude wrote in its answer or Claude Code's own built-in prompt suggestion when one is shown. The plugin adds nothing to it. A shortened suggestion is only placed in the prompt box; you read it and send it yourself.
 
 ## Privacy
 
