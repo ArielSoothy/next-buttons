@@ -34,7 +34,7 @@ In Claude Code, run:
 For manual use, download the plugin folder, replace the example path below with its absolute location, and launch a new Claude Code session:
 
 ```sh
-CLAUDE_CODE_PLUGIN_DIRS="/absolute/path/to/next-buttons${CLAUDE_CODE_PLUGIN_DIRS:+:$CLAUDE_CODE_PLUGIN_DIRS}" claude
+CLAUDE_CODE_PLUGIN_DIRS=/absolute/path/to/next-buttons claude
 ```
 
 ## Requirements and use
@@ -45,9 +45,21 @@ Start a conversation normally. The plugin asks Claude to include a short suggest
 
 Suggestions come from the model and may be imperfect. Read a suggestion before selecting it, especially when it requests an action. Fully visible suggestions send immediately; shortened suggestions replace any existing prompt draft and wait for Enter.
 
+## What the hook does
+
+The plugin has one hook module, `hooks/register.tsx`. It does three things:
+
+- Adds one short instruction to the session's system prompt (interactive sessions only) asking Claude to end each answer with a hidden `<next-buttons>…</next-buttons>` tag holding 2–4 suggested next prompts.
+- Hides that tag in the displayed answer.
+- Keeps the current suggestion list in the session's plugin state and draws it as buttons above the prompt box. The list is cleared whenever you send a prompt.
+
+What it changes: the system prompt (one extra section), the displayed answer text (the tag is removed), and the area above the prompt box (the buttons). Nothing else: no files, no settings, no network.
+
+What the buttons send: clicking a fully visible button, or typing its number, submits one prompt as your message. That prompt is exactly the clicked suggestion's text, word for word: either a suggestion Claude wrote in its answer or Claude Code's own built-in prompt suggestion when one is shown. The plugin adds nothing to it. A shortened suggestion is only placed in the prompt box; you read it and send it yourself.
+
 ## Privacy
 
-Reads only Claude's answer text to find the suggestion tag; stores nothing; sends nothing anywhere.
+Reads only Claude's answer text to find the suggestion tag (and Claude Code's built-in prompt suggestion when one is shown); keeps the current suggestions in session plugin state only while the buttons are shown; writes nothing to disk; sends nothing anywhere.
 
 Selected prompts use the normal Claude Code conversation and your configured model provider. Normal provider data handling applies.
 
@@ -55,10 +67,10 @@ Selected prompts use the normal Claude Code conversation and your configured mod
 
 Type checking needs TypeScript 5.4 or newer and the engine-generated declarations in `.claude-plugin/types/`. Those declarations are local development files, excluded by the root `.gitignore`; runtime, plugin tests, and validation work without them.
 
-From the plugin root, regenerate the declarations with this verified command:
+Replace the example path with the plugin folder's absolute location and regenerate the declarations with this verified command:
 
 ```sh
-CLAUDE_CODE_PLUGIN_DIR_WATCH=1 CLAUDE_CODE_PLUGIN_DIRS="$PWD" claude --print /help --no-session-persistence
+CLAUDE_CODE_PLUGIN_DIR_WATCH=1 CLAUDE_CODE_PLUGIN_DIRS=/absolute/path/to/next-buttons claude --print /help --no-session-persistence
 ```
 
 On Claude Code 2.1.311, this loads the plugin and writes `.claude-plugin/types/` before exiting without a model request. It prints `/help isn't available in this environment.`; that message is expected. `claude plugin init nbtmp --with hooks` scaffolds command hooks under `~/.claude/skills/nbtmp/`; it does not regenerate these declarations.
